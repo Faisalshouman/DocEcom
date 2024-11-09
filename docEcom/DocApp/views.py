@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Product , Cart , CartItem ,Order , OrderItem
-from .serializers import ProductSerializer , CartItemSerializer , OrderSerializer , OrderItemSerializer
+from .serializers import ProductSerializer ,CartSerializer, CartItemSerializer , OrderSerializer , OrderItemSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.throttling import UserRateThrottle
 from rest_framework.permissions import IsAuthenticated
@@ -66,8 +66,31 @@ class ProductDetailView(APIView):
         product = self.get_object(pk)
         product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
 class CartView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Fetch the cart for the authenticated user
+            user_cart = Cart.objects.get(user=request.user)
+        except Cart.DoesNotExist:
+            return Response({"detail": "Cart not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Retrieve all items associated with the cart
+        items = CartItem.objects.filter(cart=user_cart)
+        
+        # Serialize the cart and items
+        cart_serializer = CartSerializer(user_cart)
+        item_serializer = CartItemSerializer(items, many=True)  # 'many=True' since it's a queryset
+        
+        # Return a structured response
+        return Response({
+            "cart": cart_serializer.data,
+            "items": item_serializer.data
+        })
+    
+class CartAddItemView(APIView):
     throttle_classes = [UserRateThrottle]
     permission_classes = [IsAuthenticated]
     def post(self, request, pk):
@@ -98,6 +121,17 @@ class CartView(APIView):
         except Product.DoesNotExist:
             # Return an error if the product is not found
             return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+class CartRemoveItemView(APIView):
+    throttle_classes = [UserRateThrottle]
+    permission_classes = [IsAuthenticated]
+
+
+    def delete(self, request, pk):
+        cart = Cart.objects.get(user=request.user)
+        cart_item = CartItem.objects.get(cart=cart, product__id=pk)
+        cart_item.delete()
+        return Response({"detail": "Item removed from cart."}, status=status.HTTP_204_NO_CONTENT)
         
 class OrderCreateView(APIView):
     throttle_classes = [UserRateThrottle]
@@ -140,6 +174,25 @@ class OrderCreateView(APIView):
             return Response({"detail": "Cart not found."}, status=status.HTTP_404_NOT_FOUND)
         except Product.DoesNotExist:
             return Response({"detail": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user)
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+class OrderDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        try:
+            order = Order.objects.get(pk=pk, user=request.user)
+            serializer = OrderSerializer(order)
+            return Response(serializer.data)
+        except Order.DoesNotExist:
+            return Response({"detail": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
         
 class ProductDownloadView(APIView):
     permission_classes = [IsAuthenticated ,HasPurchasedProduct]
@@ -150,3 +203,5 @@ class ProductDownloadView(APIView):
         if order and product in order.items.all():
             return Response({'pdf_url': product.pdf_file.url})
         return Response({'detail': 'Access denied or product not purchased'}, status=status.HTTP_403_FORBIDDEN)
+    
+

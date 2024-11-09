@@ -166,3 +166,7 @@ DJOSER = {
         'current_user': 'djoser.serializers.UserSerializer',
     },
 }
+
+PAYPAL_MODE = 'sandbox'  # or 'live' when in production
+PAYPAL_CLIENT_ID = 'your-client-id'
+PAYPAL_CLIENT_SECRET = 'your-client-secret'
