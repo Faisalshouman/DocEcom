@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('DocApp.urls')),  # Adjust the path as necessary
+    path('api/', include('DocApp.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),  # Djoser JWT endpoints
+    path('auth/jwt/create/', TokenObtainPairView.as_view(), name='jwt-create'),  # obtain access & refresh token
+    path('auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt-refresh'),  # Adjust the path as necessary
 ]
