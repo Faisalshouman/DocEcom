@@ -12,6 +12,8 @@ from .views import (
     ProductDownloadView,
 )
 from .payment import paypal_webhook, PayPalPaymentView
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     # Product-related URLs
@@ -37,4 +39,5 @@ urlpatterns = [
 
 ]
 
-
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
