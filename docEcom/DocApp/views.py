@@ -195,13 +195,19 @@ class OrderDetailView(APIView):
             return Response({"detail": "Order not found."}, status=status.HTTP_404_NOT_FOUND)
         
 class ProductDownloadView(APIView):
-    permission_classes = [IsAuthenticated ,HasPurchasedProduct]
+    permission_classes = [IsAuthenticated, HasPurchasedProduct]
+
+    def get_object(self, pk):
+        try:
+            return Product.objects.get(pk=pk)
+        except Product.DoesNotExist:
+            raise status.HTTP_404_NOT_FOUND
 
     def get(self, request, pk):
-        product = Product.objects.get(pk=pk)
-        order = Order.objects.filter(user=request.user, is_paid=True).first()
-        if order and product in order.items.all():
-            return Response({'pdf_url': product.pdf_file.url})
-        return Response({'detail': 'Access denied or product not purchased'}, status=status.HTTP_403_FORBIDDEN)
-    
+        product = self.get_object(pk)
 
+        # Check if the user has purchased this product
+        if Order.objects.filter(user=request.user, is_paid=True, items__product=product).exists():
+            return Response({'pdf_url': product.pdf_file.url})
+
+        return Response({'detail': 'Access denied or product not purchased'}, status=status.HTTP_403_FORBIDDEN)

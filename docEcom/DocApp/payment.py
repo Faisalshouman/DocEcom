@@ -46,9 +46,8 @@ class PayPalPaymentView(APIView):
 
         return Response({"detail": "Payment creation failed."}, status=status.HTTP_400_BAD_REQUEST)
 
-@csrf_exempt
+@@csrf_exempt
 def paypal_webhook(request):
-    # Verify the request signature to ensure it's from PayPal
     webhook_id = settings.PAYPAL_WEBHOOK_ID
     transmission_id = request.headers.get('PayPal-Transmission-Id')
     timestamp = request.headers.get('PayPal-Transmission-Time')
@@ -68,14 +67,12 @@ def paypal_webhook(request):
         actual_sig=signature,
         auth_algo=auth_algo
     ):
-        return Response({'error': 'Invalid signature'}, status= status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Process the event type
     event_type = event.get('event_type')
     if event_type == 'PAYMENT.SALE.COMPLETED':
-        # Extract information and update the order as 'paid'
         sale = event['resource']
-        order_id = sale['invoice_id']  # Assuming `invoice_id` was set to your order ID
+        order_id = sale['invoice_id']  # Assuming invoice_id was set to your order ID
         try:
             order = Order.objects.get(id=order_id)
             order.is_paid = True
