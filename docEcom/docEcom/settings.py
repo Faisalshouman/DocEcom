@@ -24,7 +24,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure--ebp6l@$7g!fgsb3(91uy!@n3m@5(=ftqm^6328-!x2mc@z$@k'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -81,13 +82,14 @@ WSGI_APPLICATION = 'docEcom.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'EcomDjango',
-        'USER': 'DocUser',
-        'PASSWORD': 'djang0654',
-        'HOST': 'localhost',  # Use 'localhost' for local development
-        'PORT': '5432',       # Default PostgreSQL port
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
+
 
 
 # Password validation
@@ -168,5 +170,5 @@ DJOSER = {
 }
 
 PAYPAL_MODE = 'sandbox'  # or 'live' when in production
-PAYPAL_CLIENT_ID = 'your-client-id'
-PAYPAL_CLIENT_SECRET = 'your-client-secret'
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
