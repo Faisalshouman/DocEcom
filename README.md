@@ -22,28 +22,21 @@ DocEcom is a backend project built to sell downloadable PDF documents. After a s
 ```bash
 git clone https://github.com/Faisalshouman/DocEcom.git
 cd DocEcom
+
 Install Dependencies
 
-bash
-Copy
-Edit
 pip install -r requirements.txt
+
 Run Migrations
 
-bash
-Copy
-Edit
 python manage.py migrate
+
 Start the Development Server
 
-bash
-Copy
-Edit
 python manage.py runserver
+
 Access Admin Panel
 
-bash
-Copy
-Edit
 python manage.py createsuperuser
+
 Visit http://localhost:8000/admin to manage products and orders.
