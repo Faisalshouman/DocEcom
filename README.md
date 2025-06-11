@@ -25,18 +25,23 @@ cd DocEcom
 
 Install Dependencies
 
+```bash
 pip install -r requirements.txt
 
 Run Migrations
 
+```bash
 python manage.py migrate
 
 Start the Development Server
 
+```bash
 python manage.py runserver
 
 Access Admin Panel
 
+```bash
 python manage.py createsuperuser
 
 Visit http://localhost:8000/admin to manage products and orders.
+
